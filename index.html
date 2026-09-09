@@ -190,3 +190,28 @@ function checkoutCart() {
   const rzp1 = new Razorpay(options);
   rzp1.open();
 }
+function addNewProduct() {
+  const name = document.getElementById('prod-name').value;
+  const price = parseFloat(document.getElementById('prod-price').value);
+
+  if (!name || isNaN(price)) {
+    alert('Please enter a valid product name and price');
+    return;
+  }
+
+  fetch('https://ecommerce-project-94ex.onrender.com/api/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name, price: price })
+  })
+  .then(res => res.json())
+  .then(() => {
+    document.getElementById('prod-name').value = '';
+    document.getElementById('prod-price').value = '';
+    location.reload();
+  })
+  .catch(err => {
+    alert("Error adding product!");
+    console.error(err);
+  });
+}
