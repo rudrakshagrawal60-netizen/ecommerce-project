@@ -50,13 +50,19 @@
     </div>
 
    <script>
-    let cart = [];
+  let cart = [];
 
   // Initial Fetch Catalog
-  fetch('https://ecommerce-project-94ex.onrender.com/api/products')
-    .then(res => res.json())
-    .then(data => renderProducts(data))
-    .catch(err => console.error('Error fetching catalog:', err));
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchCatalog();
+  });
+
+  function fetchCatalog() {
+    fetch('https://ecommerce-project-94ex.onrender.com/api/products')
+      .then(res => res.json())
+      .then(data => renderProducts(data))
+      .catch(err => console.error('Error fetching catalog:', err));
+  }
 
   // Render Catalog
   function renderProducts(products) {
@@ -98,7 +104,7 @@
     .then(() => {
       document.getElementById('prod-name').value = '';
       document.getElementById('prod-price').value = '';
-      location.reload();
+      fetchCatalog();
     })
     .catch(err => alert('Error adding product!'));
   }
@@ -111,7 +117,7 @@
       method: 'DELETE'
     })
     .then(res => res.json())
-    .then(() => location.reload());
+    .then(() => fetchCatalog());
   }
 
   // Cart Functions
@@ -171,3 +177,4 @@
       console.error(err);
     });
   }
+</script>
