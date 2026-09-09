@@ -151,32 +151,23 @@
     const totalAmount = cart.reduce((sum, item) => sum + item.price, 0);
     const itemsList = cart.map(i => i.name).join(", ");
 
-    const options = {
-      "key": "rzp_test_dummykey",
-      "amount": totalAmount * 100,
-      "currency": "INR",
-      "name": "E-Commerce Store",
-      "description": "Order Checkout",
-      "handler": function (response) {
-        fetch('https://ecommerce-project-94ex.onrender.com/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customer_name: "Guest User",
-            amount: totalAmount,
-            items: itemsList
-          })
-        })
-        .then(res => res.json())
-        .then(() => {
-          alert("Payment Successful! Order Placed.");
-          cart = [];
-          updateCart();
-        });
-      }
-    };
-
-    const rzp1 = new Razorpay(options);
-    rzp1.open();
+    fetch('https://ecommerce-project-94ex.onrender.com/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name: "Test Customer",
+        amount: totalAmount,
+        items: itemsList
+      })
+    })
+    .then(res => res.json())
+    .then(() => {
+      alert("Payment Successful! Order Placed.");
+      cart = [];
+      updateCart();
+    })
+    .catch(err => {
+      alert("Error placing order!");
+      console.error(err);
+    });
   }
-</script>
