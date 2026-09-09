@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Engine Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <header class="border-b border-slate-700 pb-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-400">E-Commerce Management Dashboard</h1>
+            <span id="cart-count" class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                Cart Items: 0
+            </span>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Catalog Section -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-slate-200">Catalog</h2>
+                <div id="product-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Order Summary Section -->
+            <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 space-y-4">
+                <h2 class="text-xl font-semibold text-slate-200">Order Summary</h2>
+                <ul id="cart-list" class="space-y-2 divide-y divide-slate-700">
+                    <p id="empty-msg" class="text-slate-400 text-sm">Cart is currently empty.</p>
+                </ul>
+                <div class="border-t border-slate-700 pt-3 flex justify-between font-bold text-lg">
+                    <span>Total:</span>
+                    <span id="cart-total" class="text-green-400">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { id: 1, name: "Wireless Mechanical Keyboard", price: 89.99 },
+            { id: 2, name: "Ultra-Wide Monitor 34\"", price: 499.99 },
+            { id: 3, name: "Developer Ergonomic Chair", price: 299.99 }
+        ];
+
+        let cart = [];
+
+        function renderCatalog() {
+            const listEl = document.getElementById('product-list');
+            listEl.innerHTML = products.map(p => `
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold">${p.name}</h3>
+                        <p class="text-sm text-slate-400">$${p.price.toFixed(2)}</p>
+                    </div>
+                    <button onclick="addToCart(${p.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium transition">
+                        Add to Cart
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            cart.push(product);
+            updateCart();
+        }
+
+        function updateCart() {
+            document.getElementById('cart-count').innerText = `Cart Items: ${cart.length}`;
+            const cartList = document.getElementById('cart-list');
+            const emptyMsg = document.getElementById('empty-msg');
+
+            if (cart.length === 0) {
+                emptyMsg.style.display = 'block';
+                cartList.innerHTML = '';
+                cartList.appendChild(emptyMsg);
+            } else {
+                cartList.innerHTML = cart.map(item => `
+                    <li class="pt-2 flex justify-between text-sm">
+                        <span>${item.name}</span>
+                        <span class="font-mono text-blue-400">$${item.price.toFixed(2)}</span>
+                    </li>
+                `).join('');
+            }
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+        }
+
+        renderCatalog();
+    </script>
+</body>
+</html>
