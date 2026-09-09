@@ -122,3 +122,30 @@
     location.reload();
   });
 }
+// Catalog Render Function (Delete Button ke saath)
+function renderProducts(products) {
+  const container = document.getElementById('product-list');
+  container.innerHTML = products.map(p => `
+    <div class="flex justify-between items-center bg-slate-800 p-3 rounded border border-slate-700">
+      <div>
+        <h3 class="font-semibold text-slate-100">${p.name}</h3>
+        <p class="text-sm text-slate-400">$${p.price.toFixed(2)}</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="addToCart(${p.id}, '${p.name}', ${p.price})" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-sm">Add to Cart</button>
+        <button onclick="deleteProduct(${p.id})" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-sm">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Product Delete karne ka Function
+function deleteProduct(productId) {
+  if (!confirm('Are you sure you want to delete this product?')) return;
+
+  fetch(`https://ecommerce-project-94ex.onrender.com/api/products/${productId}`, {
+    method: 'DELETE'
+  })
+  .then(res => res.json())
+  .then(() => location.reload());
+}
