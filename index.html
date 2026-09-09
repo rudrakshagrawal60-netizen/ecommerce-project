@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Commerce Engine Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-6">
     <div class="max-w-4xl mx-auto space-y-6">
@@ -41,6 +42,9 @@
                     <span>Total:</span>
                     <span id="cart-total" class="text-green-400">$0.00</span>
                 </div>
+                <button onclick="checkoutCart()" class="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded">
+  Checkout & Pay
+</button>
             </div>
         </div>
     </div>
@@ -148,4 +152,41 @@ function deleteProduct(productId) {
   })
   .then(res => res.json())
   .then(() => location.reload());
+}
+function checkoutCart() {
+  if (cart.length === 0) {
+    alert("Cart is empty!");
+    return;
+  }
+
+  const totalAmount = cart.reduce((sum, item) => sum + item.price, 0);
+  const itemsList = cart.map(i => i.name).join(", ");
+
+  const options = {
+    "key": "rzp_test_dummykey",
+    "amount": totalAmount * 100,
+    "currency": "INR",
+    "name": "E-Commerce Store",
+    "description": "Order Checkout",
+    "handler": function (response) {
+      fetch('https://ecommerce-project-94ex.onrender.com/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: "Guest User",
+          amount: totalAmount,
+          items: itemsList
+        })
+      })
+      .then(res => res.json())
+      .then(() => {
+        alert("Payment Successful! Order Placed.");
+        cart = [];
+        updateCart();
+      });
+    }
+  };
+
+  const rzp1 = new Razorpay(options);
+  rzp1.open();
 }

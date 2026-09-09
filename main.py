@@ -69,3 +69,81 @@ def delete_product(product_id: int):
     conn.commit()
     conn.close()
     return {"message": "Product deleted successfully"}
+from datetime import datetime, timedelta, timezone
+from jose import JWTError, jwt
+from jose import jwt
+SECRET_KEY = "your-secret-key-for-jwt"
+ALGORITHM = "HS256"
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Password Hashing Helpers
+def hash_password(password: str):
+    return pwd_context.hash(password)
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+# JWT Token Creation
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(hours=24)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+# Admin Auth Schemas
+class AuthSchema(BaseModel):
+    username: str
+    password: str
+
+# Admin Login Endpoint
+@app.post("/api/login")
+def login(data: AuthSchema):
+    # Default Admin Credentials
+    if data.username == "admin" and data.password == "admin123":
+        token = create_access_token({"sub": data.username})
+        return {"access_token": token, "token_type": "bearer"}
+    return {"error": "Invalid credentials"}
+class OrderSchema(BaseModel):
+    customer_name: str
+    amount: float
+    items: str
+
+# Orders Table Setup
+def setup_orders_table():
+    conn = sqlite3.connect("ecommerce.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_name TEXT NOT NULL,
+            amount REAL NOT NULL,
+            items TEXT NOT NULL,
+            status TEXT DEFAULT 'Paid'
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+setup_orders_table()
+
+# Create Order API
+@app.post("/api/orders")
+def create_order(order: OrderSchema):
+    conn = sqlite3.connect("ecommerce.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO orders (customer_name, amount, items) VALUES (?, ?, ?)",
+                   (order.customer_name, order.amount, order.items))
+    conn.commit()
+    order_id = cursor.lastrowid
+    conn.close()
+    return {"id": order_id, "status": "Success"}
+
+# Get Orders List (Admin View)
+@app.get("/api/orders")
+def get_orders():
+    conn = sqlite3.connect("ecommerce.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, customer_name, amount, items, status FROM orders")
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "customer": r[1], "amount": r[2], "items": r[3], "status": r[4]} for r in rows]
